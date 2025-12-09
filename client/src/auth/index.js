@@ -10,13 +10,17 @@ export const AuthActionType = {
     GET_LOGGED_IN: "GET_LOGGED_IN",
     LOGIN_USER: "LOGIN_USER",
     LOGOUT_USER: "LOGOUT_USER",
-    REGISTER_USER: "REGISTER_USER"
+    REGISTER_USER: "REGISTER_USER",
+    EDIT_USER: "EDIT_USER",
+    SET_GUEST: "SET_GUEST"
+
 }
 
 function AuthContextProvider(props) {
     const [auth, setAuth] = useState({
         user: null,
         loggedIn: false,
+        guest: false,
         errorMessage: null
     });
     const history = useHistory();
@@ -56,6 +60,23 @@ function AuthContextProvider(props) {
                     errorMessage: payload.errorMessage
                 })
             }
+
+            case AuthActionType.EDIT_USER:{
+                return setAuth({
+                    user: payload.user,
+                    loggedIn: true,
+                    errorMessage: payload.errorMessage
+                });
+            }
+            case AuthActionType.SET_GUEST:{
+                return setAuth({
+                    user: null,
+                    loggedin: false,
+                    guest: true,
+                    errorMessage: null
+
+                })
+            }
             default:
                 return auth;
         }
@@ -74,10 +95,10 @@ function AuthContextProvider(props) {
         }
     }
 
-    auth.registerUser = async function(firstName, lastName, email, password, passwordVerify) {
+    auth.registerUser = async function(userName, email, password, passwordVerify, avatar) {
         console.log("REGISTERING USER");
         try{   
-            const response = await authRequestSender.registerUser(firstName, lastName, email, password, passwordVerify);   
+            const response = await authRequestSender.registerUser(userName, email, password, passwordVerify, avatar);   
             if (response.status === 200) {
                 console.log("Registered Sucessfully");
                 authReducer({
@@ -142,15 +163,48 @@ function AuthContextProvider(props) {
         }
     }
 
-    auth.getUserInitials = function() {
-        let initials = "";
-        if (auth.user) {
-            initials += auth.user.firstName.charAt(0);
-            initials += auth.user.lastName.charAt(0);
+    auth.editUser = async function(userName, avatar, newPassword, newPasswordVerify){
+
+        try{
+            const response = await authRequestSender.updateUser(
+
+                userName,
+                avatar,
+                newPassword,
+                newPasswordVerify
+            );
+
+            if (response.status == 200){
+                authReducer({
+                    type:AuthActionType.EDIT_USER,
+                    payload: {
+                        user: response.data.user,
+                        errorMessage: null
+
+                    }
+
+                });
+
+            }
+        }catch(error) {
+            authReducer({
+                type: AuthActionType.EDIT_USER,
+                payload:{
+                    user: auth.user,
+                    errorMessage: error.response?.data?.errorMessage ?? "Update failed."
+                }
+            });
         }
-        console.log("user initials: " + initials);
-        return initials;
     }
+
+    auth.continueAsGuest = function() {
+        authReducer({
+            type:AuthActionType.SET_GUEST,
+            payload:null
+        })
+    }
+
+    
 
     return (
         <AuthContext.Provider value={{

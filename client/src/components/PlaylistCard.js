@@ -6,6 +6,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import TextField from '@mui/material/TextField';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+
 
 /*
     This is a card in our list of top 5 lists. It lets select
@@ -19,6 +21,11 @@ function PlaylistCard(props) {
     const [editActive, setEditActive] = useState(false);
     const [text, setText] = useState("");
     const { idNamePair } = props;
+
+    const handleCopyPlaylist = (event) => {
+        event.stopPropagation();
+        store.copyPlaylist(idNamePair._id);
+    } 
 
     function handleLoadList(event, id) {
         console.log("handleLoadList for " + id);
@@ -87,6 +94,9 @@ function PlaylistCard(props) {
                         handleDeleteList(event, idNamePair._id)
                     }} aria-label='delete'>
                     <DeleteIcon style={{fontSize:'48pt'}} />
+                </IconButton>
+                <IconButton onClick={handleCopyPlaylist}>
+                <ContentCopyIcon />
                 </IconButton>
             </Box>
         </ListItem>

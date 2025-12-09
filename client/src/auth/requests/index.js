@@ -1,14 +1,4 @@
-/*
-    This is our http api for all things auth, which we use to 
-    send authorization requests to our back-end API. Note we`re 
-    using the Axios library for doing this, which is an easy to 
-    use AJAX-based library. We could (and maybe should) use Fetch, 
-    which is a native (to browsers) standard, but Axios is easier
-    to use when sending JSON back and forth and it`s a Promise-
-    based API which helps a lot with asynchronous communication.
-    
-    @author McKilla Gorilla
-*/
+
 
 import axios from 'axios'
 axios.defaults.withCredentials = true;
@@ -31,11 +21,11 @@ export const loginUser = (email, password) => {
     })
 }
 export const logoutUser = () => api.get(`/logout/`)
-export const registerUser = (firstName, lastName, email, password, passwordVerify) => {
+export const registerUser = (userName, email, password, avatar, passwordVerify) => {
     return api.post(`/register/`, {
-        firstName : firstName,
-        lastName : lastName,
+        userName : userName,
         email : email,
+        avatar : avatar,
         password : password,
         passwordVerify : passwordVerify
     })

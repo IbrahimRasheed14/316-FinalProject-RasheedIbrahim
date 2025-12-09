@@ -179,6 +179,66 @@ getPlaylists = async (req, res) => {
         return res.status(200).json({ success: true, data: playlists })
     }).catch(err => console.log(err))
 }
+
+
+copyPlaylist = async(req, res)=> {
+    try{
+
+        const userId = auth.verifyUser(req);
+        if(!userId){
+            return res.status(401).json({errorMessage:"Unauthorized"})
+        }
+        const sourceId= req.params.id;
+
+        const sourcePlaylist= await Playlist.findById(sourceId);
+        if(!sourcePlaylist){
+            return res.status(404).json({errorMessage:"Playlist not found"})
+        }
+        const currentUser= await User.findById(sourceId);
+        if(!currentUser){
+            return res.status(404).json({errorMessage:"User not found"})
+        }
+
+        const baseName = sourcePlaylist.name;
+        let copyName= baseName;
+        let counter = 0;
+
+        while(true){
+            const existing = await Playlist.findOne({
+                ownerEmail: currentUser.email,
+                name: copyName
+
+            });
+        
+        if (!existing) break;
+        counter += 1;
+        copyName = `${baseName} (${counter})`;
+    }
+
+    const songsCopy = JSON.parse(JSON.stringify(sourcePlaylist.songs));
+
+    const newPlaylist = new Playlist({
+        name: copyName,
+        ownerEmail: currentUser.email,
+        songs: songsCopy
+    });
+
+    await newPlaylist.save();
+    currentUser.playlists.push(newPlaylist._id);
+    await currentUser.save()
+
+    return res.status(201).json({
+        success: true,
+        playlist: newPlaylist
+    });
+
+}catch(err){
+    console.error(err);
+    return res.status(500).send();
+}
+
+
+};
 updatePlaylist = async (req, res) => {
     if(auth.verifyUser(req) === null){
         return res.status(400).json({
@@ -249,5 +309,6 @@ module.exports = {
     getPlaylistById,
     getPlaylistPairs,
     getPlaylists,
-    updatePlaylist
+    updatePlaylist,
+    copyPlaylist
 }

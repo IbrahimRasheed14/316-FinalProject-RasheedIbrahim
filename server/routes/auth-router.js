@@ -7,4 +7,6 @@ router.post('/login', AuthController.loginUser)
 router.get('/logout', AuthController.logoutUser)
 router.get('/loggedIn', AuthController.getLoggedIn)
 
+router.put('/edit', auth.verify, AuthController.updateUser)
+
 module.exports = router

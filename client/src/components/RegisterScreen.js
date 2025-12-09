@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import AuthContext from '../auth'
 import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
@@ -16,18 +16,37 @@ import Typography from '@mui/material/Typography';
 
 export default function RegisterScreen() {
     const { auth } = useContext(AuthContext);
+    const [avatar, setAvatar] = useState("");
 
     const handleSubmit = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         auth.registerUser(
-            formData.get('firstName'),
-            formData.get('lastName'),
+            formData.get('userName'),
             formData.get('email'),
             formData.get('password'),
             formData.get('passwordVerify')
         );
     };
+
+    const handleAvatarUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const maxSize = 200 * 1024;
+
+        if (file.size > maxSize){
+            alert("Image is too large. Must be under 200 KB");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () =>{
+            setAvatar(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+    }
 
     let modalJSX = ""
     console.log(auth);
@@ -55,25 +74,16 @@ export default function RegisterScreen() {
                     </Typography>
                     <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12}>
                                 <TextField
-                                    autoComplete="fname"
-                                    name="firstName"
+                                    margin = "normal"
                                     required
                                     fullWidth
-                                    id="firstName"
-                                    label="First Name"
+                                    id="userName"
+                                    label="User Name"
+                                    name = "userName"
+                                    autoComplete="username"
                                     autoFocus
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    id="lastName"
-                                    label="Last Name"
-                                    name="lastName"
-                                    autoComplete="lname"
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -105,8 +115,34 @@ export default function RegisterScreen() {
                                     label="Password Verify"
                                     type="password"
                                     id="passwordVerify"
-                                    autoComplete="new-password"
+                                    auto
+                                    Complete="new-password"
                                 />
+                                <Typography variant="subtitle1" sx ={{mt:2}}>
+                                    Avatar (PNG/JPG, less than 200KB)
+                                </Typography>
+
+                                <input
+                                    type="file"
+                                    accept="image/png, image/jpeg"
+                                    onChange={handleAvatarUpload}
+                                    style={{marginTop: "8px", marginBottom: "16px"}}
+                                />
+                            {avatar &&(
+                                <img
+                                    src={avatar}
+                                    alt="avatar preview"
+                                    style={{
+                                        width: "90px",
+                                        height: "90px",
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        marginBottom: "16px"
+                                    }}
+                                    />
+                            )}
+
+
                             </Grid>
                         </Grid>
                         <Button

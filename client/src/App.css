@@ -1,11 +1,5 @@
 :root {
-  /* 
-        FIRST WE'LL DEFINE OUR SWATCHES, i.e. THE COMPLEMENTARY
-        COLORS THAT WE'LL USE TOGETHER IN MULTIPLE PLACES THAT
-        TOGETHER WILL MAKE UP A GIVEN THEME
-    
-        @author McKilla Gorilla
-    */
+  
   --swatch-foundation: #eeeedd;
   --swatch-primary: #e6e6e6;
   --swatch-complement: #e1e4cb;
@@ -17,19 +11,22 @@
 }
 
 body {
-  background-image: url('https://thumbs.dreamstime.com/b/music-notes-symbols-seamless-pattern-design-fully-editable-fill-background-color-music-notes-symbols-seamless-pattern-118273669.jpg')
+  background-color: rgb(192, 158, 212);
 }
 
 #root {
   background-color: var(--swatch-primary);
-  font-family: "Lexend Exa";
-  position: absolute;
-  width: 80%;
-  left: 10%;
-  height: 90%;
-  top: 5%;
-}
+  font-family: "Courier";
 
+  max-width: 900px;
+  min-height: 90vh;
+  margin: 2rem auto;
+
+  border: 4px solid black;
+  border-radius: 6px;
+
+  position: relative;
+}
 #app-root {
   position: absolute;
   width: 100%;
@@ -54,10 +51,10 @@ body {
   border-radius: 10px;
 }
 #splash-screen {
-  background-image: url("https://www.gifcen.com/wp-content/uploads/2022/03/rickroll-gif-7.gif");
+  background-color: #d6c4d8;
   background-size: cover;
   color: rgb(0, 0, 0);
-  font-size: 10vw;
+  font-size: 45pt;
   border-color: black;
   border-width: 5px;
   border-style: solid;

@@ -320,6 +320,8 @@ function GlobalStoreContextProvider(props) {
         asyncLoadIdNamePairs();
     }
 
+   
+
     // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
     // OF A LIST, WHICH INCLUDES USING A VERIFICATION MODAL. THE
     // FUNCTIONS ARE markListForDeletion, deleteList, deleteMarkedList,
@@ -539,6 +541,17 @@ function GlobalStoreContextProvider(props) {
         });
     }
 
+    store.copyPlaylist = async function(id){
+        try{
+            const response = await storeRequestSender.copyPlaylistById(id);
+            if(response.status==201 || response.status == 200){
+                store.loadIdNamePairs();
+            }
+        }catch(err){
+                console.log("Error", err);
+            }
+    }
+
     function KeyPress(event) {
         if (!store.modalOpen && event.ctrlKey){
             if(event.key === 'z'){
@@ -560,6 +573,5 @@ function GlobalStoreContextProvider(props) {
         </GlobalStoreContext.Provider>
     );
 }
-
 export default GlobalStoreContext;
 export { GlobalStoreContextProvider };

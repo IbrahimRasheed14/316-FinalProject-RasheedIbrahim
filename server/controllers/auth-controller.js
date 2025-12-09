@@ -19,9 +19,9 @@ getLoggedIn = async (req, res) => {
         return res.status(200).json({
             loggedIn: true,
             user: {
-                firstName: loggedInUser.firstName,
-                lastName: loggedInUser.lastName,
-                email: loggedInUser.email
+                userName: loggedInUser.userName,
+                email: loggedInUser.email,
+                avatar: loggedInUser.avatar
             }
         })
     } catch (err) {
@@ -73,9 +73,9 @@ loginUser = async (req, res) => {
         }).status(200).json({
             success: true,
             user: {
-                firstName: existingUser.firstName,
-                lastName: existingUser.lastName,  
-                email: existingUser.email              
+                userName: existingUser.userName,  
+                email: existingUser.email,  
+                avatar: existingUser.avatar           
             }
         })
 
@@ -97,9 +97,9 @@ logoutUser = async (req, res) => {
 registerUser = async (req, res) => {
     console.log("REGISTERING USER IN BACKEND");
     try {
-        const { firstName, lastName, email, password, passwordVerify } = req.body;
-        console.log("create user: " + firstName + " " + lastName + " " + email + " " + password + " " + passwordVerify);
-        if (!firstName || !lastName || !email || !password || !passwordVerify) {
+        const { userName, email, password, passwordVerify, avatar } = req.body;
+        console.log("create user: " + userName + " " + email + " " + password + " " + passwordVerify + " " + avatar);
+        if (!userName || !email || !password || !passwordVerify || !avatar) {
             return res
                 .status(400)
                 .json({ errorMessage: "Please enter all required fields." });
@@ -120,6 +120,8 @@ registerUser = async (req, res) => {
                     errorMessage: "Please enter the same password twice."
                 })
         }
+      
+
         console.log("password and password verify match");
         const existingUser = await User.findOne({ email: email });
         console.log("existingUser: " + existingUser);
@@ -137,7 +139,7 @@ registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
         console.log("passwordHash: " + passwordHash);
 
-        const newUser = new User({firstName, lastName, email, passwordHash});
+        const newUser = new User({userName, email, avatar, passwordHash});
         const savedUser = await newUser.save();
         console.log("new user saved: " + savedUser._id);
 
@@ -152,9 +154,9 @@ registerUser = async (req, res) => {
         }).status(200).json({
             success: true,
             user: {
-                firstName: savedUser.firstName,
-                lastName: savedUser.lastName,  
-                email: savedUser.email              
+                userName: savedUser.userName,  
+                email: savedUser.email,   
+                avatar: savedUser.avatar           
             }
         })
 
@@ -166,9 +168,92 @@ registerUser = async (req, res) => {
     }
 }
 
+updateUser = async(req, res) =>{
+    try {
+        const userId = auth.verifyUser(req);
+        if(!userId){ 
+            return res.status(401).json({
+                errorMessage:"Unauthorized"
+            });
+        }
+
+        const {
+            userName,
+            avatar,
+            newPassword,
+            newPasswordVerify,
+        }= req.body;
+
+        const updateFields = {};
+
+
+        if(userName && userName.trim() != ""){
+            updateFields.userName= userName.trim();
+        }
+
+        if (avatar){
+            updateFields.avatar = avatar;
+        }
+
+        if(newPassword|| newPasswordVerify){
+            if(newPassword != newPasswordVerify){
+                return res.status(400).json({
+                    errorMessage:"Please enter the same password twice"
+                })
+            }
+
+            if (newPassword.length<8){
+                return res.status(400).json({
+                    errorMessage:"New password must be at least 8 characters"
+                })
+            }
+
+            const saltRounds = 10;
+            const salt = await bcrypt.genSalt(saltRounds);
+            const passwordHash = await bcrypt.hash(newPassword, salt);
+            updateFields.passwordHash = passwordHash;
+        }
+
+        if (Object.keys(updateFields).length === 0){
+            const currentUser = await User.findById(userId);
+            return res.status(200).json({
+                success: true,
+                user:{
+                    userName: currentUser.userName,
+                    email: currentUser.email,
+                    avatar: currentUser.avatar
+                }
+
+            });
+        }
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            updateFields,
+            {new:true}
+        );
+
+        return res.status(200).json({
+            success:true,
+            user:{
+                userName:updatedUser.userName,
+                email: updatedUser.email,
+                avatar:updatedUser.avatar          
+            }
+        });
+
+    }
+    catch (err){
+
+        console.error(err);
+        return res.status(500).send();
+
+    }   
+};
+
 module.exports = {
     getLoggedIn,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    updateUser
 }

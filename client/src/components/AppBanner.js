@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
 
@@ -19,6 +19,7 @@ export default function AppBanner() {
     const { store } = useContext(GlobalStoreContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
+    const history = useHistory();
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -35,6 +36,11 @@ export default function AppBanner() {
 
     const handleHouseClick = () => {
         store.closeCurrentList();
+    }
+
+    const handleEditAccount = () => {
+        handleMenuClose();
+        history.push('/edit-account')
     }
 
     const menuId = 'primary-search-account-menu';
@@ -74,7 +80,10 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
+            <MenuItem onClick={handleEditAccount}>Edit Account</MenuItem> 
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
+
+
         </Menu>        
 
     let editToolbar = "";
@@ -87,10 +96,20 @@ export default function AppBanner() {
     }
     
     function getAccountMenu(loggedIn) {
-        let userInitials = auth.getUserInitials();
-        console.log("userInitials: " + userInitials);
-        if (loggedIn) 
-            return <div>{userInitials}</div>;
+            if (loggedIn && auth.user && auth.user.avatar) {
+            return(
+             <img
+                src={auth.user.avatar}
+                alt="avatar"
+                style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    objectFit: "cover"
+                }}
+                />
+            );
+        }
         else
             return <AccountCircle />;
     }
